@@ -1,0 +1,44 @@
+{
+  "author": "Tony Butler <spudz76@gmail.com>",
+  "name": "ubersmith-api",
+  "description": "Ubersmith API",
+  "version": "0.0.1",
+  "homepage": "https://github.com/Spudz76/ubersmith-api",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Spudz76/ubersmith-api.git"
+  },
+  "license": "MIT",
+  "main": "app.js",
+  "keywords": [
+    "Ubersmith",
+    "API",
+    "REST"
+  ],
+  "engines": {
+    "node": ">=5.12.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.1",
+    "bluebird-retry": "^0.8.0",
+    "debug": "^2.2.0",
+    "graceful-fs": "^4.1.5",
+    "moment": "^2.14.1",
+    "object-manage": "^0.8.0",
+    "promisepipe": "^1.0.1",
+    "redis": "^2.6.2",
+    "restler": "^3.4.0",
+    "restler-bluebird": "^0.2.2",
+    "string": "^3.3.1"
+  },
+  "scripts": {
+    "start": "node app",
+    "test": "node ./node_modules/mocha/bin/mocha ./test/*.test.js"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2",
+    "numeral": "^1.5.3",
+    "promiseq": "^0.1.0"
+  }
+}
