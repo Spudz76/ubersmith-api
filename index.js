@@ -113,7 +113,6 @@ module.exports.loadPlugin = function(filename,namespace){
   var methods = require(filename) || {}
   if('string' !== typeof namespace && 'undefined' !== typeof methods._namespace){
     namespace = methods._namespace
-    delete methods._namespace
   } else namespace = 'RTFM'
   // NOTE: this overloads without checking... careful what you wish for
   if('object' !== typeof this.prototype[namespace]){
