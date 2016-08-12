@@ -118,6 +118,13 @@ module.exports.loadPlugin = function(filename,namespace){
   if('object' !== typeof this.prototype[namespace]){
     this.prototype[namespace] = {}
   }
-  var O = this.prototype[namespace]
-  Object.keys(methods).forEach(function(k){ O[k] = methods[k] })
+  var T = this
+  var NS = this.prototype[namespace]
+  Object.keys(methods).forEach(function(k){
+    var ref = methods[k]
+    if('' === ref){
+      ref = function(a){return T.call(k,a)}
+    }
+    NS[k] = ref
+  })
 }
