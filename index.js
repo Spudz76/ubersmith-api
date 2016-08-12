@@ -5,10 +5,15 @@
 'use strict'
 const VERSION = '1.2'
 
+var _DUMP = function(obj){
+  console.log(require('util').inspect(obj,true,10))
+}
+
 /**
  * Module dependencies.
  * @private
  */
+var ObjectManage = require('object-manage')
 var REST = require('restler')
 
 /**
@@ -21,6 +26,7 @@ var REST = require('restler')
 var uber = REST.service(
   function(options){
     options = options || { baseURL: 'http://localhost/' }
+    this.REST = REST
     this.baseURL = options.baseURL
     // value of the content type response header
     this.ContentType = null
@@ -28,7 +34,7 @@ var uber = REST.service(
     this.ContentSize = null
     // value of the filename value in the content disposition response header
     this.ContentFilename = null
-    var defaults = {
+    var defaults = new ObjectManage({
       baseURL: 'http://localhost/',
       method: 'postJson',
       encoding: 'utf8',
@@ -38,12 +44,8 @@ var uber = REST.service(
         'User-Agent': 'Ubersmith API Client NodeJS/' + VERSION
       },
       timeout: 30
-    }
-    Object.keys(options).forEach(function(k){
-      if(options[k] !== defaults[k]){
-        defaults[k] = options[k]
-      }
     })
+    defaults.$load(options)
     this.defaults = defaults
   }
   ,{},
@@ -66,10 +68,10 @@ var uber = REST.service(
      */
     getOption: function(opt,def){
       if('undefined' === typeof opt){
-        return this.defaults
+        return this.defaults.$get()
       }
       if('undefined' !== typeof this.defaults[opt]){
-        return this.defaults[opt]
+        return this.defaults.$get(opt)
       }
       if('undefined' !== typeof def){
         return def
@@ -82,19 +84,18 @@ var uber = REST.service(
     call: function(method,params){
       method = method || 'uber.method_list'
       params = params || {}
-      console.log(require('util').inspect(this,true,10))
-      return this.postJson(this.baseURL + '/api/2.0/',
-        {
-          query: {
-            method: method
-          },
-          headers: {
-            'Accept-Encoding': 'gzip',
-            'Expect': ''
-          },
-          data: params
-        }
-      )
+      var opts = new ObjectManage()
+      opts.$load(this.getOption(),{
+        query: {
+          method: method
+        },
+        headers: {
+          'Accept-Encoding': 'gzip',
+          'Expect': ''
+        },
+        data: params
+      })
+      return this.REST.postJson(this.baseURL + '/api/2.0/',opts.$get())
     },
     loadPlugin: function(filename,namespace){
       // Load methods from plugin module
