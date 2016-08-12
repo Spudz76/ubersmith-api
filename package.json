@@ -19,7 +19,7 @@
     "node": ">=5.12.0"
   },
   "dependencies": {
-    "restler-bluebird": "^0.2.2"
+    "restler": "^3.4.0"
   },
   "directories": {
     "lib": "./lib"

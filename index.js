@@ -9,7 +9,7 @@ const VERSION = '1.2'
  * Module dependencies.
  * @private
  */
-var REST = require('restler-bluebird')
+var REST = require('restler')
 
 /**
  * Create Ubersmith API restler.service
@@ -21,37 +21,32 @@ var REST = require('restler-bluebird')
 var uber = REST.service(
   function(options){
     options = options || { baseURL: 'http://localhost/' }
+    this.baseURL = options.baseURL
     // value of the content type response header
     this.ContentType = null
     // value of the content length response header
     this.ContentSize = null
     // value of the filename value in the content disposition response header
-    this.contentFilename = null
+    this.ContentFilename = null
+    var defaults = {
+      baseURL: 'http://localhost/',
+      method: 'postJson',
+      encoding: 'utf8',
+      decoding: 'utf8',
+      headers: {
+        'Accept': '*/*',
+        'User-Agent': 'Ubersmith API Client NodeJS/' + VERSION
+      },
+      timeout: 30
+    }
+    Object.keys(options).forEach(function(k){
+      if(options[k] !== defaults[k]){
+        defaults[k] = options[k]
+      }
+    })
+    this.defaults = defaults
   }
-  ,
-  {
-    method: 'get',
-    query: '',
-    data: undefined,
-    parser: undefined,
-    xml2js: {},
-    encoding: 'utf8',
-    decoding: 'utf8',
-    headers: {
-      'Accept': '*/*',
-      'User-Agent': 'Ubersmith API Client NodeJS/' + VERSION
-    },
-    username: '',
-    password: '',
-    accessToken: '',
-    multipart: false,
-    client: '',
-    followRedirects: true,
-    timeout: 30,
-    rejectUnauthorized: true,
-    agent: undefined
-  }
-  ,
+  ,{},
   {
     /**
      * Set an option
@@ -87,6 +82,7 @@ var uber = REST.service(
     call: function(method,params){
       method = method || 'uber.method_list'
       params = params || {}
+      console.log(require('util').inspect(this,true,10))
       return this.postJson(this.baseURL + '/api/2.0/',
         {
           query: {
@@ -99,6 +95,26 @@ var uber = REST.service(
           data: params
         }
       )
+    },
+    loadPlugin: function(filename,namespace){
+      // Load methods from plugin module
+      var methods = require('./lib/' + filename) || {}
+      if('string' !== typeof namespace && 'undefined' !== typeof methods._namespace){
+        namespace = methods._namespace
+      } else namespace = filename
+      // NOTE: this overloads without checking... careful what you wish for
+      if('object' !== typeof this[namespace]){
+        this[namespace] = {}
+      }
+      var T = this
+      var NS = this[namespace]
+      Object.keys(methods).forEach(function(k){
+        var ref = methods[k]
+        if('' === ref){
+          ref = function(a){return T.call(k,a)}
+        }
+        NS[k] = ref
+      })
     }
   }
 )
@@ -108,23 +124,3 @@ var uber = REST.service(
  * @public
  */
 module.exports = uber
-module.exports.loadPlugin = function(filename,namespace){
-  // Load methods from plugin module
-  var methods = require(filename) || {}
-  if('string' !== typeof namespace && 'undefined' !== typeof methods._namespace){
-    namespace = methods._namespace
-  } else namespace = 'RTFM'
-  // NOTE: this overloads without checking... careful what you wish for
-  if('object' !== typeof this.prototype[namespace]){
-    this.prototype[namespace] = {}
-  }
-  var T = this
-  var NS = this.prototype[namespace]
-  Object.keys(methods).forEach(function(k){
-    var ref = methods[k]
-    if('' === ref){
-      ref = function(a){return T.call(k,a)}
-    }
-    NS[k] = ref
-  })
-}
