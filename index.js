@@ -25,7 +25,7 @@ var REST = require('restler')
  */
 var uber = REST.service(
   function(options){
-    options = options || { baseURL: 'http://localhost/' }
+    options = options || { baseURL: 'http://localhost' }
     this.REST = REST
     this.baseURL = options.baseURL
     // value of the content type response header
@@ -36,17 +36,16 @@ var uber = REST.service(
     this.ContentFilename = null
     var defaults = new ObjectManage({
       baseURL: 'http://localhost/',
-      method: 'postJson',
+      method: 'post',
       encoding: 'utf8',
       decoding: 'utf8',
       headers: {
-        'Accept': '*/*',
         'User-Agent': 'Ubersmith API Client NodeJS/' + VERSION
       },
       timeout: 30
     })
     defaults.$load(options)
-    this.defaults = defaults
+    this.REST.defaults = defaults.$get()
   }
   ,{},
   {
@@ -68,10 +67,10 @@ var uber = REST.service(
      */
     getOption: function(opt,def){
       if('undefined' === typeof opt){
-        return this.defaults.$get()
+        return this.REST.defaults
       }
-      if('undefined' !== typeof this.defaults[opt]){
-        return this.defaults.$get(opt)
+      if('undefined' !== typeof this.REST.defaults[opt]){
+        return this.REST.defaults[opt]
       }
       if('undefined' !== typeof def){
         return def
@@ -86,16 +85,16 @@ var uber = REST.service(
       params = params || {}
       var opts = new ObjectManage()
       opts.$load(this.getOption(),{
-        query: {
-          method: method
-        },
         headers: {
           'Accept-Encoding': 'gzip',
-          'Expect': ''
+          'Accept': 'application/json'
         },
-        data: params
+        query: {method: method}
       })
-      return this.REST.postJson(this.baseURL + '/api/2.0/',opts.$get())
+      var apiOpt = opts.$get()
+      _DUMP(apiOpt)
+      _DUMP(params)
+      return this.json('POST','/api/2.0/',params,apiOpt)
     },
     loadPlugin: function(filename,namespace){
       // Load methods from plugin module
@@ -112,7 +111,7 @@ var uber = REST.service(
       Object.keys(methods).forEach(function(k){
         var ref = methods[k]
         if('' === ref){
-          ref = function(a){return T.call(k,a)}
+          ref = function(a){return T.call(namespace + '.' + k,a)}
         }
         NS[k] = ref
       })
