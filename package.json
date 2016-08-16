@@ -20,7 +20,8 @@
   },
   "dependencies": {
     "object-manage": "^0.8.0",
-    "restler": "^3.4.0"
+    "path": "^0.12.7",
+    "request": "^2.74.0"
   },
   "directories": {
     "lib": "./lib"
